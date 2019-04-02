@@ -49,21 +49,51 @@ Require Import Coq.Arith.Plus.
 
 Lemma zerol (a : aexp)(s : state)(i : nat)(p : (a , s) f=> i) :
   (0 +' a , s) f=> i.
-Proof.
-
-Qed.
 (* END FIX *)
+Proof.
+  assert (H1 : fstep (0 +' a, s) (0 + i)).
+    apply (fplusr _ _ _ _ p).
+  rewrite plus_0_l in H1.
+  apply H1.
+Qed.
+
 
 (* BEGIN FIX *)
 (* HINT: use plus_0_r at some point. *)
 Lemma zeror (a : aexp)(s : state)(i : nat)(p : (a , s) f=> i) :
   (a +' 0 , s) f=> i.
 (* END FIX *)
+Proof.
+  assert (H1 : step (a +' 0, s) (i +' 0, s)).
+    apply (fplusl _ _ _ _ p).
+  assert (H2 : fstep (i +' 0, s) (i + 0)).
+    apply fplusr. apply num.
+  rewrite plus_0_r in H2.
+  apply (ftrans _ _ _ H1 H2).
+Qed.
 
 (* BEGIN FIX *)
 Example der1 (s : state) : (3 +' 2 , s) f=> 5.
 (* END FIX *)
+Proof.
+  assert (H1 : fstep (3 +' 2, s) (3 + 2)).
+    apply fplusr. apply num. simpl in H1.
+  exact H1.
+Qed.
+
 
 (* BEGIN FIX *)
 Example der2 : (3 +' (X +' 2) , update X 1 empty) f=> 6.
 (* END FIX *)
+Proof.
+  assert (H1 : fstep (X +' 2, update X 1 empty) (3)).
+    assert (H2 : fstep (AVar X, update X 1 empty) 1).
+      apply (var X).
+    assert (H3 : step (X +' 2, update X 1 empty) (1 +' 2, update X 1 empty)).
+      apply (fplusl _ _ _ _ H2).
+    assert (H4 : forall (s : state), fstep (1 +' 2, s) 3).
+      intros. apply fplusr. apply num.
+
+    apply (ftrans _ _ _ H3 (H4 (update X 1 empty))).
+  apply (fplusr 3 _ _ _ H1).
+Qed.
