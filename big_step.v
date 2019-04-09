@@ -23,11 +23,11 @@ Inductive fstep : aexp * state -> nat -> Prop :=
   | num (n : nat)(s : state) : fstep (ANum n , s) n
   | var (x : name)(s : state) : fstep (AVar x , s) (s x)
   | fplusr (n i : nat)(a2 : aexp)(s : state) :
-           fstep (a2 , s) i -> 
+           fstep (a2 , s) i ->
            fstep (n +' a2 , s) (n + i).
 Inductive step : aexp * state -> aexp * state -> Prop :=
   | plusl (a1 a2 a1t : aexp)(s : state) :
-          step (a1 , s) (a1t , s) -> 
+          step (a1 , s) (a1t , s) ->
           step (a1 +' a2 , s) (a1t +' a2 , s)
   | fplusl (a1 a2 : aexp)(s : state)(i : nat) :
            fstep (a1 , s) i ->
@@ -67,21 +67,21 @@ Inductive bstep : aexp * state -> nat -> Prop :=
   | bsum (a1 a2 : aexp)(s : state)(n1 n2 : nat) :
       bstep (a1 , s) n1 -> bstep (a2 , s) n2 -> bstep (a1 +' a2 , s) (n1 + n2).
 
-Notation "w b=> i" := (bstep w i) (at level 50).
+Notation "w b=> i" := (bstep w i) (at level 50).
 
 Require Import Coq.Arith.Arith.
 
-Lemma todenot : forall a s n, (a , s) b=> n -> aeval a s = n.
+Lemma todenot : forall a s n, (a , s) b=> n -> aeval a s = n.
 Proof.
   intros.
   generalize dependent n.
   induction a.
     intros. inversion H. trivial.
-    intros. inversion H. trivial. 
+    intros. inversion H. trivial.
     intros. simpl. inversion H. rewrite (IHa1 n1 H4). rewrite (IHa2 n2 H5). trivial.
 Qed.
 
-Lemma fromdenot : forall a s n, aeval a s = n -> (a , s) b=> n.
+Lemma fromdenot : forall a s n, aeval a s = n -> (a , s) b=> n.
 Proof.
   intros.
   generalize dependent n.
@@ -90,7 +90,7 @@ Proof.
     intros. simpl in H. rewrite <- H. apply bvar.
     intros. simpl in H.
       rewrite <- H.
-      apply (bsum a1 a2 s (aeval a1 s) (aeval a2 s)). 
+      apply (bsum a1 a2 s (aeval a1 s) (aeval a2 s)).
       apply (IHa1 (aeval a1 s)). trivial.
       apply (IHa2 (aeval a2 s)). trivial.
 Qed.
